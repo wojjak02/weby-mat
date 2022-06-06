@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Page Title</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- <link rel='stylesheet' type='text/css' media='screen' href='main.css'> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        .box{
+            width:30px;
+            height:30px;
+            border-radius:6px;
+            border:1px solid black;
+            display:inline-block;
+            padding:5px;
+        }
+    </style>
+</head>
+<body>
+    <input type="number" id="sirka">
+    <input type="number" id="vyska">
+    <button id="clicked">nastavit</button>
+    <p>Selected:<span id="selected"></span> </p>
+    <div style="width:fit-content;margin:0px auto;display:block" id="plocha">
+    </div>
+    <script>
+        let policka = []
+        let porovnej = 0;
+        let char = 0
+        const config = {
+            sirka: 4,
+            vyska:4
+        }
+        $("#clicked").click(() => {
+            config.sirka = $("#sirka").val()
+            config.vyska = $("#vyska").val()
+            naplnPole()
+            setTimeout(() => {
+                vykresliPole()
+
+            },400)
+        })
+        class Policko {
+            constructor(index, char){
+                this.index = index;
+                this.char = char;
+                this.status = 0; 
+                // status = 0 = policko neni otoceny ( prazdny )
+                // status = 1 = policko je docasne otoceny ( kliknutim )
+                // status = 2 = dvojice policek je otocena spraven
+            }
+        }
+        const naplnPole = () => {
+            policka = []
+            char = 0
+            for (let i = 0; i < config.sirka; i++) {
+                for (let j = 0; j < config.vyska; j++) {
+                    if(j%2==0){
+                        char++
+                    }
+                    policka.push( new Policko(i+j, char))
+                }
+                policka.sort(() => Math.random() - 0.5);
+            }
+        }
+        const vykresliPole = () => {
+            $("#plocha").html("")
+            let html = '', index = 0
+            for (let i = 0; i < config.vyska; i++) {
+                html+= "<div class='radek'>";
+                for(let j=0;j<config.sirka;j++) {
+                    html+=`<div class="box" onclick='klikevt(policka[${index}])'>${policka[index].status == 0 ? " " : policka[index].char}</div>`
+                    index++
+                }
+                html += "</div>";
+                $('#plocha').append(html)
+                html=""
+            }
+        }
+        const schovKliknuty = () => {
+            for(let s in policka){
+                if(policka[s].status == 1) policka[s].status = 0
+            }
+            vykresliPole()
+        }
+
+        const klikevt = evt => {
+            evt.status = 1
+            if(porovnej == 0) {
+                porovnej = evt.char
+            }else{
+                if(porovnej == evt.char){
+                    console.log("TREFA")
+                    for(let s in policka){
+                        if(policka[s].char === porovnej) policka[s].status = 2
+                    }
+                }else{
+                    console.log("SPATNE")
+                    setTimeout(() => {
+                        schovKliknuty()
+                    }, 1000)
+                }
+                porovnej=0
+            }
+            vykresliPole()
+            $("#selected").html(porovnej)
+        }
+
+
+        naplnPole()
+        vykresliPole()
+
+
+
+       
+    </script>
+</body>
+</html>
